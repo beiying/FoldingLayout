@@ -27,6 +27,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -119,6 +120,7 @@ public class FoldingLayout extends ViewGroup {
     @Override
     protected boolean addViewInLayout(View child, int index, LayoutParams params,
                                       boolean preventRequestLayout) {
+    	Log.e("Fold", " addViewInLayout");
         throwCustomException(getChildCount());
         boolean returnValue = super.addViewInLayout(child, index, params, preventRequestLayout);
         return returnValue;
@@ -126,12 +128,14 @@ public class FoldingLayout extends ViewGroup {
 
     @Override
     public void addView(View child, int index, LayoutParams params) {
+    	Log.e("Fold", " addView");
         throwCustomException(getChildCount());
         super.addView(child, index, params);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    	Log.e("Fold", " onMeasure");
         View child = getChildAt(0);
         measureChild(child,widthMeasureSpec, heightMeasureSpec);
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
@@ -139,6 +143,7 @@ public class FoldingLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    	Log.e("Fold", " onLayout");
         View child = getChildAt(0);
         child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
         updateFold();
@@ -170,6 +175,7 @@ public class FoldingLayout extends ViewGroup {
      * matrices and values to account for the new fold factor. Once that is complete,
      * it redraws itself with the new fold. */
     public void setFoldFactor(float foldFactor) {
+    	Log.e("Fold", " setFoldFactor");
         if (foldFactor != mFoldFactor) {
             mFoldFactor = foldFactor;
             calculateMatrices();
@@ -178,6 +184,7 @@ public class FoldingLayout extends ViewGroup {
     }
 
     public void setOrientation(Orientation orientation) {
+    	Log.e("Fold", " setOrientation");
         if (orientation != mOrientation) {
             mOrientation = orientation;
             updateFold();
@@ -185,6 +192,7 @@ public class FoldingLayout extends ViewGroup {
     }
 
     public void setAnchorFactor(float anchorFactor) {
+    	Log.e("Fold", " setAnchorFactor");
         if (anchorFactor != mAnchorFactor) {
             mAnchorFactor = anchorFactor;
             updateFold();
@@ -192,6 +200,7 @@ public class FoldingLayout extends ViewGroup {
     }
 
     public void setNumberOfFolds(int numberOfFolds) {
+    	Log.e("Fold", " setNumberOfFolds");
         if (numberOfFolds != mNumberOfFolds) {
             mNumberOfFolds = numberOfFolds;
             updateFold();
@@ -215,6 +224,7 @@ public class FoldingLayout extends ViewGroup {
     }
 
     private void updateFold() {
+    	Log.e("Fold", " updateFold");
         prepareFold(mOrientation, mAnchorFactor, mNumberOfFolds);
         calculateMatrices();
         invalidate();
@@ -229,7 +239,7 @@ public class FoldingLayout extends ViewGroup {
      * After this method is called, it will be in a completely unfolded state by default.
      */
     private void prepareFold(Orientation orientation, float anchorFactor, int numberOfFolds) {
-
+    	Log.e("Fold", " prepareFold");
         mSrc = new float[NUM_OF_POLY_POINTS];
         mDst = new float[NUM_OF_POLY_POINTS];
 
@@ -349,28 +359,32 @@ public class FoldingLayout extends ViewGroup {
                 mOriginalHeight * cTranslationFactor;
 
         float translatedDistancePerFold = Math.round(translatedDistance / mNumberOfFolds);
-
+        Log.e("Fold", " calculateMatrices cTranslationFactor="+cTranslationFactor);
+        Log.e("Fold", " calculateMatrices translatedDistance="+translatedDistance);
+        Log.e("Fold", " calculateMatrices translatedDistancePerFold="+translatedDistancePerFold);
         /* For an odd number of folds, the rounding error may cause the
          * translatedDistancePerFold to be grater than the max fold width or height. */
         mFoldDrawWidth = mFoldMaxWidth < translatedDistancePerFold ?
                 translatedDistancePerFold : mFoldMaxWidth;
         mFoldDrawHeight = mFoldMaxHeight < translatedDistancePerFold ?
                 translatedDistancePerFold : mFoldMaxHeight;
-
+        Log.e("Fold", " calculateMatrices scaledWidth="+mFoldDrawWidth);
+        Log.e("Fold", " calculateMatrices scaledHeight="+mFoldDrawHeight);
         float translatedDistanceFoldSquared = translatedDistancePerFold * translatedDistancePerFold;
-
+        Log.e("Fold", " calculateMatrices translatedDistanceFoldSquared="+translatedDistanceFoldSquared);
         /* Calculate the depth of the fold into the screen using pythagorean theorem. */
         float depth = mIsHorizontal ?
                 (float)Math.sqrt((double)(mFoldDrawWidth * mFoldDrawWidth -
                         translatedDistanceFoldSquared)) :
                 (float)Math.sqrt((double)(mFoldDrawHeight * mFoldDrawHeight -
                         translatedDistanceFoldSquared));
-
+        Log.e("Fold", " calculateMatrices depth="+depth);
         /* The size of some object is always inversely proportional to the distance
         *  it is away from the viewpoint. The constant can be varied to to affect the
         *  amount of perspective. */
         float scaleFactor = DEPTH_CONSTANT / (DEPTH_CONSTANT + depth);
 
+        Log.e("Fold", " calculateMatrices scaleFactor="+scaleFactor);
         float scaledWidth, scaledHeight, bottomScaledPoint, topScaledPoint, rightScaledPoint,
                 leftScaledPoint;
 
@@ -382,19 +396,27 @@ public class FoldingLayout extends ViewGroup {
             scaledHeight = mFoldDrawHeight * cTranslationFactor;
         }
 
+        Log.e("Fold", " calculateMatrices scaledWidth="+scaledWidth);
+        Log.e("Fold", " calculateMatrices scaledHeight="+scaledHeight);
+        
         topScaledPoint = (mFoldDrawHeight - scaledHeight) / 2.0f;
         bottomScaledPoint = topScaledPoint + scaledHeight;
 
         leftScaledPoint = (mFoldDrawWidth - scaledWidth) / 2.0f;
         rightScaledPoint = leftScaledPoint + scaledWidth;
 
+        Log.e("Fold", " calculateMatrices topScaledPoint="+topScaledPoint);
+        Log.e("Fold", " calculateMatrices bottomScaledPoint="+bottomScaledPoint);
+        Log.e("Fold", " calculateMatrices leftScaledPoint="+leftScaledPoint);
+        Log.e("Fold", " calculateMatrices rightScaledPoint="+rightScaledPoint);
+        
         float anchorPoint = mIsHorizontal ? mAnchorFactor * mOriginalWidth :
                 mAnchorFactor * mOriginalHeight;
-
+        Log.e("Fold", " calculateMatrices anchorPoint="+anchorPoint);
         /* The fold along which the anchor point is located. */
         float midFold = mIsHorizontal ? (anchorPoint / mFoldDrawWidth) : anchorPoint /
                 mFoldDrawHeight;
-
+        Log.e("Fold", " calculateMatrices midFold="+midFold);
         mSrc[0] = 0;
         mSrc[1] = 0;
         mSrc[2] = 0;
@@ -403,13 +425,16 @@ public class FoldingLayout extends ViewGroup {
         mSrc[5] = 0;
         mSrc[6] = mFoldDrawWidth;
         mSrc[7] = mFoldDrawHeight;
-
+        for(int a = 0;a<mSrc.length;a++){
+        	Log.e("Fold", " calculateMatrices mSrc["+a+"]="+mSrc[a]);
+        }
         /* Computes the transformation matrix for each fold using the values calculated above. */
         for (int x = 0; x < mNumberOfFolds; x++) {
 
             boolean isEven = (x % 2 == 0);
 
             if (mIsHorizontal) {
+            	Log.e("Fold", " calculateMatrices mIsHorizontal="+mIsHorizontal);
                 mDst[0] = (anchorPoint > x * mFoldDrawWidth) ? anchorPoint + (x - midFold) *
                         scaledWidth : anchorPoint - (midFold - x) * scaledWidth;
                 mDst[1] = isEven ? 0 : topScaledPoint;
@@ -420,8 +445,11 @@ public class FoldingLayout extends ViewGroup {
                 mDst[5] = isEven ? topScaledPoint : 0;
                 mDst[6] = mDst[4];
                 mDst[7] = isEven ? bottomScaledPoint : mFoldDrawHeight;
-
+                for(int a = 0;a<mDst.length;a++){
+                	Log.e("Fold", " calculateMatrices mDst["+a+"]="+mDst[a]);
+                }
             } else {
+            	Log.e("Fold", " calculateMatrices mIsHorizontal="+mIsHorizontal);
                 mDst[0] = isEven ? 0 : leftScaledPoint;
                 mDst[1] = (anchorPoint > x * mFoldDrawHeight) ? anchorPoint + (x - midFold) *
                         scaledHeight : anchorPoint - (midFold - x) * scaledHeight;
@@ -432,11 +460,15 @@ public class FoldingLayout extends ViewGroup {
                 mDst[5] = mDst[1];
                 mDst[6] = isEven ? rightScaledPoint : mFoldDrawWidth;
                 mDst[7] = mDst[3];
+                for(int a = 0;a<mDst.length;a++){
+                	Log.e("Fold", " calculateMatrices mDst["+a+"]="+mDst[a]);
+                }
             }
 
             /* Pixel fractions are present for odd number of folds which need to be
              * rounded off here.*/
             for (int y = 0; y < 8; y ++) {
+            	Log.e("Fold", " calculateMatrices mDst[]="+mDst[y]);
                 mDst[y] = Math.round(mDst[y]);
             }
 
@@ -456,6 +488,7 @@ public class FoldingLayout extends ViewGroup {
                 }
             }
 
+            Log.e("Fold", " calculateMatrices mSrc="+mSrc+";mDst="+mDst);
             /* Sets the shadow and bitmap transformation matrices.*/
             mMatrix[x].setPolyToPoly(mSrc, 0, mDst, 0, NUM_OF_POLY_POINTS / 2);
         }

@@ -165,6 +165,7 @@ public class FoldingLayoutActivity extends Activity {
 
         @Override
         public void onEndFold() {
+        	Log.e("Fold", " OnFoldListener onEndFold");
             setSepiaLayer(mFoldLayout.getChildAt(0), false);
         }
     };
